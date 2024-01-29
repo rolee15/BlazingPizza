@@ -1,5 +1,6 @@
 using BlazingPizza;
 using BlazingPizza.Contexts;
+using BlazingPizza.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,8 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddHttpClient();
 builder.Services.AddDbContext<PizzaStoreContext>(options =>
       options.UseSqlite("Data Source=pizza.db"));
+
+builder.Services.AddScoped<OrderState>();
 
 var app = builder.Build();
 
