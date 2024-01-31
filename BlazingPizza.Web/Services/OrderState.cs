@@ -38,6 +38,11 @@ public class OrderState
         Order.Pizzas.Remove(pizza);
     }
 
+    public void ResetOrder()
+    {
+        Order = new Order();
+    }
+
     private void CloseConfigurePizzaDialog()
     {
         ConfiguringPizza = null;
