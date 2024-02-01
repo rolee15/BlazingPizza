@@ -25,7 +25,7 @@ public class OrdersController : Controller
             .OrderByDescending(o => o.CreatedTime)
             .ToListAsync();
 
-        return orders.Select(o => OrderWithStatus.FromOrder(o)).ToList();
+        return orders.Select(OrderWithStatus.FromOrder).ToList();
     }
 
     [HttpPost]
@@ -46,5 +46,22 @@ public class OrdersController : Controller
         await _db.SaveChangesAsync();
 
         return order.OrderId;
+    }
+    
+    [HttpGet("{orderId:int}")]
+    public async Task<ActionResult<OrderWithStatus>> GetOrderWithStatus(int orderId)
+    {
+        var order = await _db.Orders
+            .Where(o => o.OrderId == orderId)
+            .Include(o => o.Pizzas).ThenInclude(p => p.Special)
+            .Include(o => o.Pizzas).ThenInclude(p => p.Toppings).ThenInclude(t => t.Topping)
+            .SingleOrDefaultAsync();
+
+        if (order == null)
+        {
+            return NotFound();
+        }
+
+        return OrderWithStatus.FromOrder(order);
     }
 }
