@@ -1,6 +1,4 @@
-﻿using BlazingPizza.Model;
-
-namespace BlazingPizza;
+﻿namespace BlazingPizza.Model;
 
 public class Order
 {

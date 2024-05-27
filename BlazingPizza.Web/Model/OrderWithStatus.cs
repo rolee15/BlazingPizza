@@ -16,7 +16,7 @@ public class OrderWithStatus
         // To simulate a real backend process, we fake status updates based on the amount
         // of time since the order was placed
         string statusText;
-        var dispatchTime = order.CreatedTime.Add(PreparationDuration);
+        DateTime dispatchTime = order.CreatedTime.Add(PreparationDuration);
 
         if (DateTime.Now < dispatchTime)
         {

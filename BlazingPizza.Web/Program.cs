@@ -3,7 +3,7 @@ using BlazingPizza.Contexts;
 using BlazingPizza.Services;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
@@ -14,7 +14,7 @@ builder.Services.AddDbContext<PizzaStoreContext>(options =>
 
 builder.Services.AddScoped<OrderState>();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
@@ -31,7 +31,7 @@ app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 
 // Initialize the database
 var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
-using (var scope = scopeFactory.CreateScope())
+using (IServiceScope scope = scopeFactory.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<PizzaStoreContext>();
     if (db.Database.EnsureCreated())
