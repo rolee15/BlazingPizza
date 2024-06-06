@@ -13,7 +13,7 @@ public class Address
     public string Line1 { get; set; }
 
     [MaxLength(100)]
-    public string Line2 { get; set; }
+    public string? Line2 { get; set; }
 
     [Required] [MinLength(3, ErrorMessage = "Please use a City bigger than 3 letters.")] [MaxLength(50, ErrorMessage = "Please use a City less than 50 letters.")]
     public string City { get; set; }

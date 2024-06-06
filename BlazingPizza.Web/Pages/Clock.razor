@@ -1,0 +1,63 @@
+﻿@page "/Clock"
+
+<div>
+    <span>@DateTime.Now.ToString("HH:mm:ss")</span>
+</div>
+
+@code {
+
+    private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(1));
+
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        Console.WriteLine("SetParametersAsync called");
+        return base.SetParametersAsync(parameters);
+    }
+
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("OnInitialized called");
+        base.OnInitialized();
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        Console.WriteLine("OnInitializedAsync called");
+        return base.OnInitializedAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        Console.WriteLine("OnParametersSet called");
+        base.OnParametersSet();
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        Console.WriteLine("OnParametersSetAsync called");
+        return base.OnParametersSetAsync();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        Console.WriteLine($"OnAfterRender with firstRender={firstRender} called");
+        base.OnAfterRender(firstRender);
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine($"OnAfterRenderAsync with firstRender={firstRender} called");
+        return firstRender ? StartPollingTimerAsync() : Task.CompletedTask;
+    }
+
+    private async Task StartPollingTimerAsync()
+    {
+        Console.WriteLine("StartPollingTimerAsync called");
+        while (await _timer.WaitForNextTickAsync())
+        {
+            Console.WriteLine("WaitForNextTickAsync returned");
+            StateHasChanged();
+        }
+    }
+
+}

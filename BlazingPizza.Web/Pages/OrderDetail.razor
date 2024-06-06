@@ -1,5 +1,6 @@
 ﻿@page "/myorders/{orderId:int}"
 @using BlazingPizza.Model
+@implements IDisposable
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
 
@@ -14,7 +15,7 @@
         <div class="track-order">
             <div class="track-order-title">
                 <h2>
-                  <text>Loading...</text>
+                    <text>Loading...</text>
                 </h2>
                 <p class="ml-auto mb-0">
                     ...
@@ -35,16 +36,22 @@
             </div>
             <div class="track-order-body">
                 <div class="track-order-details">
-                  @foreach (Pizza pizza in _orderWithStatus.Order.Pizzas)
-                  {
-                      <p>
-                          <strong>
-                              @(pizza.Size)"
-                              @pizza.Special.Name
-                              (£@pizza.GetFormattedTotalPrice())
-                          </strong>
-                      </p>
-                  }
+                    @if (IsOrderIncomplete)
+                    {
+                        <div class="spinner-grow text-danger float-right" role="status">
+                            <span class="sr-only">Checking your order status...</span>
+                        </div>
+                    }
+                    @foreach (Pizza pizza in _orderWithStatus.Order.Pizzas)
+                    {
+                        <p>
+                            <strong>
+                                @(pizza.Size)"
+                                @pizza.Special.Name
+                                (£@pizza.GetFormattedTotalPrice())
+                            </strong>
+                        </p>
+                    }
                 </div>
             </div>
         </div>
@@ -54,20 +61,43 @@
 @code {
     [Parameter] public int OrderId { get; set; }
 
-    OrderWithStatus _orderWithStatus;
+    bool IsOrderIncomplete =>
+        _orderWithStatus is null || _orderWithStatus.IsDelivered == false;
+
+    readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(3));
+
+    OrderWithStatus? _orderWithStatus;
     bool _invalidOrder;
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnParametersSetAsync() =>
+        await GetLatestOrderStatusUpdatesAsync();
+
+    protected override Task OnAfterRenderAsync(bool firstRender) =>
+        firstRender ? StartPollingTimerAsync() : Task.CompletedTask;
+
+    async Task GetLatestOrderStatusUpdatesAsync()
     {
-      try
-      {
-          _orderWithStatus = await HttpClient.GetFromJsonAsync<OrderWithStatus>(
-              $"{NavigationManager.BaseUri}orders/{OrderId}");
-      }
-      catch (Exception ex)
-      {
-          _invalidOrder = true;
-          Console.Error.WriteLine(ex);
-      }
+        try
+        {
+            _orderWithStatus = await HttpClient.GetFromJsonAsync<OrderWithStatus>(
+                $"{NavigationManager.BaseUri}orders/{OrderId}");
+        }
+        catch (Exception ex)
+        {
+            _invalidOrder = true;
+            Console.Error.WriteLine(ex);
+        }
     }
+
+    async Task StartPollingTimerAsync()
+    {
+        while (IsOrderIncomplete && await _timer.WaitForNextTickAsync())
+        {
+            await GetLatestOrderStatusUpdatesAsync();
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose() => _timer.Dispose();
+
 }

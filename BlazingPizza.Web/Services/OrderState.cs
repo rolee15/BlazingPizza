@@ -5,7 +5,7 @@ namespace BlazingPizza.Services;
 public class OrderState
 {
     public bool ShowingConfigureDialog { get; private set; }
-    public Pizza ConfiguringPizza { get; private set; }
+    public Pizza? ConfiguringPizza { get; private set; }
     public Order Order { get; private set; } = new();
 
     public void ShowConfigurePizzaDialog(PizzaSpecial special)
@@ -15,7 +15,7 @@ public class OrderState
             Special = special,
             SpecialId = special.Id,
             Size = Pizza.DefaultSize,
-            Toppings = new List<PizzaTopping>()
+            Toppings = []
         };
 
         ShowingConfigureDialog = true;
@@ -28,7 +28,10 @@ public class OrderState
 
     public void ConfirmConfigurePizzaDialog()
     {
-        Order.Pizzas.Add(ConfiguringPizza);
+        if (ConfiguringPizza != null)
+        {
+            Order.Pizzas.Add(ConfiguringPizza);
+        }
 
         CloseConfigurePizzaDialog();
     }
